@@ -1,0 +1,95 @@
+Graph representing PCA.
+
+```{r}
+library(datasets)
+library(ggplot2)
+library(plotly)
+
+data(iris)
+
+# Perform PCA
+iris_pca <- prcomp(iris[,1:4], scale. = TRUE)
+pca_data <- data.frame(PC1 = iris_pca$x[,1], 
+                       PC2 = iris_pca$x[,2],
+                       Species = iris$Species)
+
+# Plot Iris data
+base_fig <- plot_ly(x=iris[,1], y=iris[,2], z=iris[,3], type="scatter3d", mode="markers", color=iris$Species)
+base_fig <- base_fig %>% layout(
+  scene = list(
+    xaxis = list(title = "Sepal Length"),
+    yaxis = list(title = "Sepal Width"),
+    zaxis = list(title = "Petal Length")
+  ),
+  title = "Iris Dataset"
+)
+base_fig
+
+# Plot PCA results
+ggplot(pca_data, aes(x = PC1, y = PC2, color = Species)) +
+  geom_jitter(size = 3) +
+  labs(title = "PCA of Iris Dataset", x = "Principal Component 1", y = "Principal Component 2") +
+  theme_minimal()
+
+iris[1:6,]
+pca_data[1:6,]
+
+```
+
+Graph of Discriminant Analysis
+
+```{r}
+library(MASS)
+
+# Perform LDA
+iris_lda <- lda(Species ~ ., data = iris)
+
+# Predict the LDA values
+lda_pred <- predict(iris_lda)
+
+# Create a data frame with LDA results
+lda_data <- data.frame(LD1 = lda_pred$x[,1], 
+                       LD2 = lda_pred$x[,2], 
+                       Species = iris$Species)
+
+# Plot Iris data
+ggplot(iris, aes(x = iris[,1], y = iris[,2], color = Species)) +
+  geom_jitter(size = 3) +
+  labs(title = "Iris Dataset", x = "Sepal Length", y = "Sepal Width") +
+  theme_minimal()
+
+# Plot the LDA results
+ggplot(lda_data, aes(x = LD1, y = LD2, color = Species)) +
+  geom_jitter(size = 3) +
+  labs(title = "LDA of Iris Dataset", x = "Linear Discriminant 1", y = "Linear Discriminant 2") +
+  theme_minimal()
+
+```
+
+Now combine them
+
+```{r}
+
+# Perform PCA
+iris_pca <- prcomp(iris[,1:4], scale. = TRUE)
+pca_data <- data.frame(PC1 = iris_pca$x[,1], 
+                       PC2 = iris_pca$x[,2],
+                       Species = iris$Species)
+
+# Perform LDA
+iris_pca_lda <- lda(Species ~ ., data = pca_data)
+
+# Predict the LDA values
+pca_lda_pred <- predict(iris_pca_lda)
+
+# Create a data frame with LDA results
+pca_lda_data <- data.frame(LD1 = pca_lda_pred$x[,1], 
+                           LD2 = pca_lda_pred$x[,2], 
+                           Species = iris$Species)
+
+# Plot the PCA-LDA results
+ggplot(pca_lda_data, aes(x = LD1, y = LD2, color = Species)) +
+  geom_jitter(size = 3) +
+  labs(title = "PCA-LDA of Iris Dataset", x = "Linear Discriminant 1", y = "Linear Discriminant 2") +
+  theme_minimal()
+```
